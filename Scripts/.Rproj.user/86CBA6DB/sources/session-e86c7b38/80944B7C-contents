@@ -1,0 +1,119 @@
+rm(list=ls())
+
+library(tess3r)
+library(maps)
+library(sf)
+library(ggplot2)
+library(rworldmap)
+library(Rgraphviz)
+
+# grab data
+data(data.at)
+genotype = data.at$X
+coordinates = data.at$coord
+
+# plot coordinates on a map
+plot(coordinates, pch = 19, cex = .5, 
+     xlab = "Longitude (°E)", ylab = "Latitude (°N)")
+map(add = T, interior = F)
+
+################################# RUN TESS ######################################
+
+# run TESS
+# 14 minutes for 25 SNPs, 100 individuals
+tess3.obj <- tess3(X = genotype, 
+                   coord = coordinates, 
+                   K = 1:8, 
+                   method = "projected.ls", 
+                   ploidy = 1, 
+                   openMP.core.num = 4) 
+
+################################# LOOK AT RMSE PLOTS ######################################
+# plot of root mean-squared errors (like cross-entropy/validation)
+plot(tess3.obj, pch = 19, col = "blue",
+     xlab = "Number of ancestral populations",
+     ylab = "Cross-validation score")
+
+# retrieve tess3 Q matrix for K = 5 clusters 
+q.matrix <- qmatrix(tess3.obj, K = 5)
+
+################################# STRUCTURE-LIKE BAR PLOTS ######################################
+# STRUCTURE-like barplot for the Q-matrix (couple of color options)
+# barplot(q.matrix, border = NA, space = 0, 
+#         xlab = "Individuals", ylab = "Ancestry proportions", 
+#         main = "Ancestry matrix") -> bp
+# axis(1, at = 1:nrow(q.matrix), labels = bp$order, las = 3, cex.axis = .4) 
+my.colors <- c("red","yellow","green","blue","violet")
+my.palette <- CreatePalette(my.colors, 5)
+barplot(q.matrix, border = NA, space = 0, 
+        main = "Ancestry matrix", 
+        xlab = "Individuals", ylab = "Ancestry proportions", 
+        col.palette = my.palette) -> bp
+axis(1, at = 1:nrow(q.matrix), labels = bp$order, las = 3, cex.axis = .4) 
+
+
+############## PIE CHART (LIKE ADMIXTURE/STRUCTURE) ###############
+plot(coordinates, pch = 19, cex = .5, 
+     xlab = "Longitude (°E)", ylab = "Latitude (°N)")
+map(add = T, interior = F)
+
+# Loop through each row of q.matrix and coordinates
+for (i in 1:nrow(q.matrix)) {
+  # Call the pieGlyph function for each row with respective coordinates
+  pieGlyph(q.matrix[i, ], coordinates[i, 1], coordinates[i, 2], 
+           edges = 200, radius = 0.5, density = NULL, angle = 45, 
+           col = my.colors, border = NULL, lty = NULL, 
+           main = paste("Ancestry Coefficients - Point", i))
+}
+
+
+################################# MAP OF ANCESTRY COEFFICIENTS ######################################
+# map of ancestry coefficients (may get the "no package called 'raster'" error)
+plot(q.matrix, coordinates, method = "map.max", interpol = FieldsKrigModel(10),  
+     main = "Ancestry coefficients",
+     xlab = "Longitude", ylab = "Latitude", 
+     resolution = c(300,300), cex = .4, 
+     col.palette = my.palette)
+
+#### Alternative version of map with more info #####
+map.polygon <- getMap(resolution = "low")
+
+pl <- ggtess3Q(q.matrix, coordinates, map.polygon = map.polygon)
+pl +
+  geom_path(data = map.polygon, aes(x = long, y = lat, group = group)) +
+  xlim(-16, 42) + 
+  ylim(35, 65) + 
+  coord_equal() + 
+  geom_point(data = as.data.frame(coordinates), aes(x = V1, y = V2), size = 0.2) + 
+  xlab("Longitute") +
+  ylab("Latitude") + 
+  theme_bw()
+
+
+
+
+
+############## OLD PIE CODE ###############
+library("Rgraphviz")
+
+# Load data
+b<-read.table("R-input.txt", header=T)     #Tab delimited datafile, each individual's data in a row
+
+# Setup plot
+svg("MDS2.svg")
+plot.new()
+plot.window(xlim=c(-0.1, 0.25), ylim=c(-0.1, 0.21))
+axis(1)
+axis(2)
+box()
+
+#To plot each pie chart
+a<-nrow(b) #"a" is how many pie charts will be plotted
+for(g in 1:a){ 
+  x<-c(b[g,18],b[g,19],b[g,20]) #"x" is now the pie chart, with slices equal to values in the 18th, 19th, and 20th columns of the datasheet
+  pieGlyph(x, b[g,14], b[g,15], col=c("blue","red","green"),edges=200, radius=0.0075,labels=NA)}  #this just plots the pie chart (x) at XY coordinates in the 14th and 15th columns.
+#You will have to adjust the colors, edges, and radius to fit your graph.  Also, if a pie is something like (1,0,0) it will not work, so you have to change it to (0.99999,0.00001,0.000001) or something similar.
+dev.off()
+
+
+
