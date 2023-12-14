@@ -51,7 +51,7 @@ map(add = T, interior = F)
 ```{r, echo=FALSE}
 tess3.obj <- tess3(X = genotype, 
                    coord = coordinates, 
-                   K = 1:8, 
+                   K = 1:7, 
                    method = "projected.ls", 
                    ploidy = 1, 
                    openMP.core.num = 4)
