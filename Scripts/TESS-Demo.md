@@ -8,6 +8,8 @@ TESS3 is available as R package [`tess3r`](https://github.com/bcm-uga/TESS3_ench
 * Genotype matrix
 * Geographic data (e.g. longitude and latitude)
 
+In this example dataset, we will be using data for ~25,000 SNPs from 170 *Arabidopsis thaliana* plants.
+
 ## Load Packages and Explore Data
 ### Load packages:
 ```{r, echo=FALSE}
@@ -78,7 +80,7 @@ STRUCTURE, ADMIXTURE, and similar approaches often represent ancestry coefficien
 ### Box plots: 
 ```{r, echo=FALSE}
 my.colors <- c("red","yellow","green","blue","violet")
-my.palette <- CreatePalette(my.colors, 5)
+my.palette <- CreatePalette(my.colors, 9)
 barplot(q.matrix, border = NA, space = 0, 
         main = "Ancestry matrix", 
         xlab = "Individuals", ylab = "Ancestry proportions", 

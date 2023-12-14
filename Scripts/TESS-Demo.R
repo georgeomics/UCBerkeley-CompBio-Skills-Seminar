@@ -34,7 +34,7 @@ q.matrix <- qmatrix(tess3.obj, K = 5)
 
 # STRUCTURE-LIKE BAR PLOTS
 my.colors <- c("red","yellow","green","blue","violet")
-my.palette <- CreatePalette(my.colors, 5)
+my.palette <- CreatePalette(my.colors, 9)
 barplot(q.matrix, border = NA, space = 0, 
         main = "Ancestry matrix", 
         xlab = "Individuals", ylab = "Ancestry proportions", 
