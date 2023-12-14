@@ -68,6 +68,10 @@ Retrieving data based on desired number of ancestral populations (e.g., tess3 Q 
 q.matrix <- qmatrix(tess3.obj, K = 5)
 ```
 
+### Questions:
+* *What is the purpose of retrieving the 'q.matrix'? What does this data contain?*
+* *Do you agree with the chosen number of ancestral populatons?*
+
 ## STRUCTURE-like plots:
 STRUCTURE, ADMIXTURE, and similar approaches often represent ancestry coefficients with box plots, where colors represent ancestral populations and columns represent individuals. If geographic data is available, box plots may be converted to pie charts layered on a map. TESS3 output can similarly be represented this way.
 
